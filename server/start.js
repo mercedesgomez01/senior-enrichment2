@@ -2,26 +2,97 @@
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const {resolve} = require('path')
+const path = require('path')
 
 const pkg = require('../package.json')
 
 const app = express()
+module.exports = app
+
+const favicon = require('serve-favicon');
 
 if (process.env.NODE_ENV !== 'production') {
   // Logging middleware (non-production only)
   app.use(require('volleyball'))
-}  
+  var logMiddleware = require('volleyball');
+}
+
+var rootPath = path.join(__dirname, '../');
+var indexPath = path.join(rootPath, './public/index.html');
+var faviconPath = path.join(rootPath, './public/favicon.ico');
+var env = require(path.join(rootPath, './db/index.js'));
+
+// var rootPath = path.join(__dirname, '../../../');
+// var indexPath = path.join(rootPath, './browser/index.html');
+// var faviconPath = path.join(rootPath, './public/favicon.ico');
+
+// var env = require(path.join(rootPath, './server/env'));
+
+
+
+  // setValue and getValue are merely alias
+  // for app.set and app.get used in the less
+  // common way of setting application variables.
+  app.setValue = app.set.bind(app);
+
+  app.getValue = function (path) {
+      return app.get(path);
+  };
+
 
 //The code below works because `.use` returns `this` which is `app`. So what we want to return in the `module.exports` is `app`, and we can chain on that declaration because each method invokation returns `app` after mutating based on the middleware functions
-module.exports = app
-  .use(bodyParser.urlencoded({ extended: true }))
-  .use(bodyParser.json())
-  .use(express.static(resolve(__dirname, '..', 'public'))) // Serve static files from ../public
-  .use('/api', require('./api')) // Serve our api
-  .get('/*', (_, res) => res.sendFile(resolve(__dirname, '..', 'public', 'index.html'))) // Send index.html for any other requests.
+  app.use(bodyParser.urlencoded({ extended: true }))
+  app.use(bodyParser.json())
+  app.use(express.static(path.resolve(__dirname, '..', 'public'))) // Serve static files from ../public
+  app.use('/api', require('./routes')) // Serve our api
 
-  // notice the use of `_` as the first parameter above. This is a pattern for parameters that must exist, but you don't use or reference (or need) in the function body that follows.
+  app.setValue('env', env);
+  app.setValue('projectRoot', rootPath);
+  app.setValue('indexHTMLPath', indexPath);
+  app.setValue('faviconPath', faviconPath);
+  app.setValue('log', logMiddleware);
+
+  // app.get('/*', (_, res) => res.sendFile(path.resolve(__dirname, '..', 'public', 'index.html')))
+
+  // Logging middleware, set as application
+  // variable inside of server/app/configure/app-variables.js
+  app.use(app.getValue('log'));
+
+//Static middleware
+
+  var root = app.getValue('projectRoot');
+
+  var npmPath = path.join(root, './node_modules');
+  var publicPath = path.join(root, './public');
+  var browserPath = path.join(root, './browser');
+
+  app.use(favicon(app.getValue('faviconPath')));
+  app.use(express.static(npmPath));
+  app.use(express.static(publicPath));
+  app.use(express.static(browserPath));
+
+
+  app.use(function (req, res, next) {
+
+    if (path.extname(req.path).length > 0) {
+        res.status(404).end();
+    } else {
+        next(null);
+    }
+
+});
+
+
+app.get('/*', function (req, res) {
+    res.sendFile(app.get('indexHTMLPath'));
+});
+
+// Error catching endware.
+app.use(function (err, req, res, next) {
+    console.error(err, typeof next);
+    console.error(err.stack)
+    res.status(err.status || 500).send(err.message || 'Internal server error.');
+});
 
 if (module === require.main) {
   // Start listening only if we're the main module.
@@ -43,3 +114,6 @@ if (module === require.main) {
     }
   )
 }
+                  //Guess we won't create node server with this from react
+                  // var server = require('http').createServer();. listen does it for us. :)
+
