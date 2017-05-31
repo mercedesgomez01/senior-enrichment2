@@ -8,7 +8,7 @@ const Campus = models.Campus;
 module.exports = api;
 
 api.get('/', function (req, res, next) {
-  Campus.scope('defaultScope', 'songIds').findAll({ where: req.query })
+  Campus.scope('defaultScope', 'userIds').findAll({ where: req.query })
   .then(campuses => res.json(campuses))
   .catch(next);
 });

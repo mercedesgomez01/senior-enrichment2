@@ -22,8 +22,8 @@ const Users = (props) => {
 					          </button>
 					        </td>
 					        <td>{user.name}</td>
-					        <td>{user.academy}</td>
-					        {/*<td>{song.genre}</td>*/}
+					        {/*<td>{user.campus}</td>*/}
+					        <td>{user.genre}</td>
 					      </tr>
 
 					)

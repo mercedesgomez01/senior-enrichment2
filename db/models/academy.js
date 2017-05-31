@@ -8,7 +8,7 @@ const DataTypes = db.Sequelize;
 module.exports = db.define('academy', {
 
   name: {
-    type: DataTypes.STRING(1e4), // eslint-disable-line new-cap
+    type: DataTypes.STRING, // eslint-disable-line new-cap
     allowNull: false,
     set: function (val) {
       this.setDataValue('name', val.trim());

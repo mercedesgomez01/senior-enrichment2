@@ -45,20 +45,20 @@ function open(url) {
     : request(url)
 }
 
-// api.get('/:userId/image', function (req, res, next) {                    //need to figure out musicMetadata NPM package
-//   musicMetadata(open(req.user.url), function (err, metadata) {
-//     if (err) { return next(err) }
-//     const pic = metadata.picture[0]
-//     pic? res
-//       .set('Content-Type', mime.lookup(pic.format))
-//       .send(pic.data)
-//       : res.redirect('/default-campus.jpg')
-//   })
-// });
+api.get('/:userId/image', function (req, res, next) {                    //need to figure out musicMetadata NPM package
+  musicMetadata(open(req.user.url), function (err, metadata) {
+    if (err) { return next(err) }
+    const pic = metadata.picture[0]
+    pic? res
+      .set('Content-Type', mime.lookup(pic.format))
+      .send(pic.data)
+      : res.redirect('/default-campus.jpg')
+  })
+});
 
-// api.get('/:userId/audio', function (req, res, next) {
-//   const url = urlParse(req.song.url)
-//   url.protocol === 'file:'?
-//     res.sendFile(decodeURIComponent(url.path))
-//     : res.redirect(req.song.url)
-// });
+api.get('/:userId/audio', function (req, res, next) {
+  const url = urlParse(req.user.url)
+  url.protocol === 'file:'?
+    res.sendFile(decodeURIComponent(url.path))
+    : res.redirect(req.user.url)
+});

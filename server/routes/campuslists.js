@@ -52,10 +52,10 @@ api.delete('/:campuslistId', function (req, res, next) {
 
 api.get('/:campuslistId/users', (req, res) => res.json(req.campuslist.users));
 
-api.post('/:campuslistId/songs', function (req, res, next) {
-  const id = req.body.id || req.body.song.id;
+api.post('/:campuslistId/users', function (req, res, next) {
+  const id = req.body.id || req.body.user.id;
   req.campuslist.addAndReturnUser(id)
-  .then(song => res.status(201).json(song))
+  .then(user => res.status(201).json(user))
   .catch(err => {
     if (err.name === 'SequelizeUniqueConstraintError') {
       res.status(409).send('User is already in the campuslist.');
